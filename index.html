@@ -233,7 +233,7 @@
   <section class="block">
     <h2>自由に質問してみる</h2>
     <div class="input-row">
-      <input type="text" id="free-input" placeholder="例：あすなろハイツ弐番館の空室ありますか" maxlength="200">
+      <input type="text" id="free-input" aria-label="質問を入力" placeholder="例：あすなろハイツ弐番館の空室ありますか" maxlength="200">
       <button id="send-btn">送信</button>
     </div>
     <div id="char-count">0 / 200</div>
@@ -258,18 +258,18 @@
   // マスタデータ（デモ用の架空データ）
   // ============================================================
   var PROPERTY_MASTER = [
-    { id: 'P001', name: 'あすなろハイツ弐番館', type: 'マンション', vacancy: '空室あり（2部屋）', rent: '8.5万円〜', drawing: 'あり', viewing: '可（要予約）', aliases: ['あすなろハイツ'] },
-    { id: 'P002', name: 'グリーンコート中央', type: 'アパート', vacancy: '満室', rent: 'ー', drawing: 'あり', viewing: '不可', aliases: ['グリーンコート'] },
-    { id: 'P003', name: 'サンライズ戸建A棟', type: '戸建', vacancy: '空室あり（1棟）', rent: '15万円', drawing: 'あり', viewing: '可（即日）', aliases: ['サンライズ戸建'] },
-    { id: 'P004', name: 'あすなろレジデンス駅前', type: 'マンション', vacancy: '空室なし（キャンセル待ち）', rent: '9.8万円〜', drawing: 'なし', viewing: '不可', aliases: ['あすなろレジデンス'] },
-    { id: 'P005', name: 'みどり台テラス', type: 'アパート', vacancy: '空室あり（1部屋）', rent: '6.2万円', drawing: 'あり', viewing: '可（要予約）', aliases: ['みどり台テラス'] }
+    { name: 'あすなろハイツ弐番館', vacancy: '空室あり（2部屋）', rent: '8.5万円〜', drawing: 'あり', viewing: '可（要予約）', aliases: ['あすなろハイツ'] },
+    { name: 'グリーンコート中央', vacancy: '満室', rent: 'ー', drawing: 'あり', viewing: '不可', aliases: ['グリーンコート'] },
+    { name: 'サンライズ戸建A棟', vacancy: '空室あり（1棟）', rent: '15万円', drawing: 'あり', viewing: '可（即日）', aliases: ['サンライズ戸建'] },
+    { name: 'あすなろレジデンス駅前', vacancy: '空室なし（キャンセル待ち）', rent: '9.8万円〜', drawing: 'なし', viewing: '不可', aliases: ['あすなろレジデンス'] },
+    { name: 'みどり台テラス', vacancy: '空室あり（1部屋）', rent: '6.2万円', drawing: 'あり', viewing: '可（要予約）', aliases: ['みどり台テラス'] }
   ];
 
   var SITE_MASTER = [
-    { id: 'K001', name: '中央町共同住宅新築工事', workType: '新築', startDate: '2026-04-01', completionDate: '2026-10-31', progress: '55%', phase: '内装下地工事', aliases: ['中央町共同住宅'] },
-    { id: 'K002', name: 'みなと倉庫改修工事', workType: '改修', startDate: '2026-06-15', completionDate: '2026-08-31', progress: '20%', phase: '解体工事', aliases: ['みなと倉庫'] },
-    { id: 'K003', name: '桜坂戸建新築工事', workType: '新築', startDate: '2026-03-01', completionDate: '2026-07-15', progress: '90%', phase: '外構工事', aliases: ['桜坂戸建'] },
-    { id: 'K004', name: '東口ビル外壁修繕工事', workType: '修繕', startDate: '2026-07-01', completionDate: '2026-09-15', progress: '5%', phase: '足場設置', aliases: ['東口ビル'] }
+    { name: '中央町共同住宅新築工事', startDate: '2026-04-01', completionDate: '2026-10-31', progress: '55%', phase: '内装下地工事', aliases: ['中央町共同住宅'] },
+    { name: 'みなと倉庫改修工事', startDate: '2026-06-15', completionDate: '2026-08-31', progress: '20%', phase: '解体工事', aliases: ['みなと倉庫'] },
+    { name: '桜坂戸建新築工事', startDate: '2026-03-01', completionDate: '2026-07-15', progress: '90%', phase: '外構工事', aliases: ['桜坂戸建'] },
+    { name: '東口ビル外壁修繕工事', startDate: '2026-07-01', completionDate: '2026-09-15', progress: '5%', phase: '足場設置', aliases: ['東口ビル'] }
   ];
 
   // カテゴリ判定ルール（判定順。先にマッチした方を採用）
@@ -444,6 +444,10 @@
 
   freeInput.addEventListener('input', updateCharCount);
   freeInput.addEventListener('keydown', function (e) {
+    // IME変換確定のEnterキーは送信しない（isComposingがtrueの間、またはkeyCode 229の場合は無視）
+    if (e.isComposing || e.keyCode === 229) {
+      return;
+    }
     if (e.key === 'Enter') {
       submitQuestion(freeInput.value);
     }
