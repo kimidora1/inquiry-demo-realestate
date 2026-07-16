@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>問い合わせデモ｜あすなろ不動産・建設</title>
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --panel: #ffffff;
+    --text: #222222;
+    --sub: #555555;
+    --border: #dddddd;
+    --accent: #0066cc;
+    --accent-fg: #ffffff;
+    --bubble-user: #0066cc;
+    --bubble-user-fg: #ffffff;
+    --bubble-ai: #eef4ff;
+    --bubble-ai-fg: #222222;
+    --bubble-followup: #fff3e0;
+    --bubble-followup-fg: #7a4a00;
+    --shadow: rgba(0, 0, 0, .08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a;
+      --panel: #262626;
+      --text: #e4e4e4;
+      --sub: #bbbbbb;
+      --border: #3a3a3a;
+      --accent: #4d9fff;
+      --accent-fg: #10233a;
+      --bubble-user: #4d9fff;
+      --bubble-user-fg: #10233a;
+      --bubble-ai: #2a3d52;
+      --bubble-ai-fg: #e4e4e4;
+      --bubble-followup: #4a3620;
+      --bubble-followup-fg: #ffd9a0;
+      --shadow: rgba(0, 0, 0, .4);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+    padding: 16px;
+  }
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  h1 {
+    font-size: 1.3em;
+    margin: 0 0 4px;
+    color: var(--accent);
+  }
+  .lead {
+    color: var(--sub);
+    margin: 0 0 20px;
+    font-size: .95em;
+  }
+  .before-after {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .ba-card {
+    flex: 1 1 220px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .ba-card h2 {
+    font-size: .85em;
+    margin: 0 0 6px;
+    color: var(--sub);
+    letter-spacing: .05em;
+  }
+  .ba-card p {
+    margin: 0;
+    font-size: .95em;
+  }
+  .ba-before h2 { color: #c0392b; }
+  .ba-after h2 { color: var(--accent); }
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    color: var(--sub);
+    flex: 0 0 auto;
+  }
+  section.block {
+    margin-bottom: 20px;
+  }
+  section.block h2 {
+    font-size: 1em;
+    margin: 0 0 10px;
+    color: var(--sub);
+  }
+  .sample-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .sample-btn {
+    border: 1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 8px 14px;
+    font-size: .85em;
+    cursor: pointer;
+    text-align: left;
+  }
+  .sample-btn:hover {
+    background: var(--bubble-ai);
+  }
+  .input-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  #free-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--text);
+    font-size: .95em;
+  }
+  #send-btn, #reset-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: .9em;
+    cursor: pointer;
+  }
+  #send-btn {
+    background: var(--accent);
+    color: var(--accent-fg);
+  }
+  #reset-btn {
+    background: transparent;
+    color: var(--sub);
+    border: 1px solid var(--border);
+  }
+  #char-count {
+    font-size: .75em;
+    color: var(--sub);
+    text-align: right;
+    margin-top: 4px;
+  }
+  #chat-log {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 120px;
+    max-height: 480px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: .92em;
+  }
+  .bubble.user {
+    align-self: flex-end;
+    background: var(--bubble-user);
+    color: var(--bubble-user-fg);
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.ai {
+    align-self: flex-start;
+    background: var(--bubble-ai);
+    color: var(--bubble-ai-fg);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.ai.followup {
+    background: var(--bubble-followup);
+    color: var(--bubble-followup-fg);
+  }
+  .empty-log {
+    color: var(--sub);
+    font-size: .85em;
+  }
+  footer {
+    margin-top: 20px;
+    font-size: .75em;
+    color: var(--sub);
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>問い合わせデモ｜あすなろ不動産・建設</h1>
+  <p class="lead">物件・工事現場に関する問い合わせに、AIがマスタデータを参照して即時回答するデモです。すべて架空のデータです。</p>
+
+  <div class="before-after">
+    <div class="ba-card ba-before">
+      <h2>BEFORE</h2>
+      <p>定型的な問い合わせも担当者が個別に確認するため、回答まで数時間〜翌営業日かかる。</p>
+    </div>
+    <div class="arrow">→</div>
+    <div class="ba-card ba-after">
+      <h2>AFTER</h2>
+      <p>空室確認・工事進捗などの定型問い合わせはAIが即時回答。個別交渉などの非定型のみ担当者へ引き継ぐ。</p>
+    </div>
+  </div>
+
+  <section class="block">
+    <h2>サンプル質問を試す</h2>
+    <div class="sample-buttons" id="sample-buttons"></div>
+  </section>
+
+  <section class="block">
+    <h2>自由に質問してみる</h2>
+    <div class="input-row">
+      <input type="text" id="free-input" placeholder="例：あすなろハイツ弐番館の空室ありますか" maxlength="200">
+      <button id="send-btn">送信</button>
+    </div>
+    <div id="char-count">0 / 200</div>
+  </section>
+
+  <section class="block">
+    <h2>チャット</h2>
+    <div id="chat-log"><p class="empty-log">サンプル質問を押すか、質問を入力して送信してください。</p></div>
+    <div class="input-row" style="justify-content:flex-end; margin-top:12px;">
+      <button id="reset-btn">表示をリセット</button>
+    </div>
+  </section>
+
+  <footer>本サイトはデモ用の架空データのみを扱っており、実在の物件・企業・顧客情報は含まれません。</footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================
+  // マスタデータ（デモ用の架空データ）
+  // ============================================================
+  var PROPERTY_MASTER = [
+    { id: 'P001', name: 'あすなろハイツ弐番館', type: 'マンション', vacancy: '空室あり（2部屋）', rent: '8.5万円〜', drawing: 'あり', viewing: '可（要予約）', aliases: ['あすなろハイツ'] },
+    { id: 'P002', name: 'グリーンコート中央', type: 'アパート', vacancy: '満室', rent: 'ー', drawing: 'あり', viewing: '不可', aliases: ['グリーンコート'] },
+    { id: 'P003', name: 'サンライズ戸建A棟', type: '戸建', vacancy: '空室あり（1棟）', rent: '15万円', drawing: 'あり', viewing: '可（即日）', aliases: ['サンライズ戸建'] },
+    { id: 'P004', name: 'あすなろレジデンス駅前', type: 'マンション', vacancy: '空室なし（キャンセル待ち）', rent: '9.8万円〜', drawing: 'なし', viewing: '不可', aliases: ['あすなろレジデンス'] },
+    { id: 'P005', name: 'みどり台テラス', type: 'アパート', vacancy: '空室あり（1部屋）', rent: '6.2万円', drawing: 'あり', viewing: '可（要予約）', aliases: ['みどり台テラス'] }
+  ];
+
+  var SITE_MASTER = [
+    { id: 'K001', name: '中央町共同住宅新築工事', workType: '新築', startDate: '2026-04-01', completionDate: '2026-10-31', progress: '55%', phase: '内装下地工事', aliases: ['中央町共同住宅'] },
+    { id: 'K002', name: 'みなと倉庫改修工事', workType: '改修', startDate: '2026-06-15', completionDate: '2026-08-31', progress: '20%', phase: '解体工事', aliases: ['みなと倉庫'] },
+    { id: 'K003', name: '桜坂戸建新築工事', workType: '新築', startDate: '2026-03-01', completionDate: '2026-07-15', progress: '90%', phase: '外構工事', aliases: ['桜坂戸建'] },
+    { id: 'K004', name: '東口ビル外壁修繕工事', workType: '修繕', startDate: '2026-07-01', completionDate: '2026-09-15', progress: '5%', phase: '足場設置', aliases: ['東口ビル'] }
+  ];
+
+  // カテゴリ判定ルール（判定順。先にマッチした方を採用）
+  var CATEGORY_RULES = [
+    { category: '図面有無', keywords: ['図面'], masterType: 'property' },
+    { category: '空室確認', keywords: ['空室'], masterType: 'property' },
+    { category: '内見可否', keywords: ['内見'], masterType: 'property' },
+    { category: '竣工予定', keywords: ['竣工', '完成'], masterType: 'site' },
+    { category: '工事進捗', keywords: ['進捗'], masterType: 'site' }
+  ];
+
+  var STATUS_ANSWERED = 'answered';
+  var STATUS_FOLLOWUP = 'followup';
+  var FOLLOWUP_ANSWER = '現在担当者が内容を確認しております。追って担当者よりご連絡いたしますので、今しばらくお待ちください。';
+
+  // サンプル質問（定型4件＋非定型1件）
+  var SAMPLE_QUESTIONS = [
+    'あすなろハイツ弐番館の空室ありますか',
+    'サンライズ戸建A棟の内見できますか',
+    '中央町共同住宅新築工事の進捗どうですか',
+    '桜坂戸建の完成はいつ頃ですか',
+    'あすなろレジデンス駅前、家賃交渉できますか'
+  ];
+
+  // ============================================================
+  // カテゴリ判定・マスタ突き合わせ
+  // ============================================================
+  function findMaster(text, masterList) {
+    for (var i = 0; i < masterList.length; i++) {
+      var item = masterList[i];
+      var candidates = [item.name].concat(item.aliases || []);
+      for (var j = 0; j < candidates.length; j++) {
+        var name = candidates[j];
+        if (name && text.indexOf(name) !== -1) {
+          return item;
+        }
+      }
+    }
+    return null;
+  }
+
+  function classify(text) {
+    for (var i = 0; i < CATEGORY_RULES.length; i++) {
+      var rule = CATEGORY_RULES[i];
+      for (var j = 0; j < rule.keywords.length; j++) {
+        if (text.indexOf(rule.keywords[j]) !== -1) {
+          return { category: rule.category, masterType: rule.masterType };
+        }
+      }
+    }
+    return { category: 'その他', masterType: null };
+  }
+
+  function buildAnswer(text) {
+    var classified = classify(text);
+    var category = classified.category;
+    var masterType = classified.masterType;
+
+    if (category === 'その他') {
+      return { answer: FOLLOWUP_ANSWER, status: STATUS_FOLLOWUP };
+    }
+
+    var masterList = masterType === 'property' ? PROPERTY_MASTER : SITE_MASTER;
+    var item = findMaster(text, masterList);
+    if (item === null) {
+      return { answer: FOLLOWUP_ANSWER, status: STATUS_FOLLOWUP };
+    }
+
+    if (category === '空室確認') {
+      return {
+        answer: item.name + 'の空室状況は「' + item.vacancy + '」です。賃料は' + item.rent + 'です。',
+        status: STATUS_ANSWERED
+      };
+    }
+
+    if (category === '内見可否') {
+      var answer = item.name + 'の内見可否は「' + item.viewing + '」です。';
+      // 「不可」を先に判定する（「可」の部分一致だと「不可」にも一致してしまうため）
+      if (item.viewing.indexOf('不可') !== -1) {
+        answer += '現在内見をお受けできない状況です。ご了承ください。';
+      } else {
+        answer += 'ご希望の日時をご連絡いただければ、担当者より予約枠をご案内します。';
+      }
+      return { answer: answer, status: STATUS_ANSWERED };
+    }
+
+    if (category === '図面有無') {
+      if (item.drawing === 'あり') {
+        return {
+          answer: item.name + 'の図面はご用意がございます。担当者よりデータを送付いたします。',
+          status: STATUS_ANSWERED
+        };
+      }
+      return { answer: FOLLOWUP_ANSWER, status: STATUS_FOLLOWUP };
+    }
+
+    if (category === '工事進捗') {
+      return {
+        answer: item.name + 'の進捗率は' + item.progress + '、現在の工程は「' + item.phase + '」です。',
+        status: STATUS_ANSWERED
+      };
+    }
+
+    if (category === '竣工予定') {
+      return {
+        answer: item.name + 'の竣工予定日は' + item.completionDate + 'です。',
+        status: STATUS_ANSWERED
+      };
+    }
+
+    return { answer: FOLLOWUP_ANSWER, status: STATUS_FOLLOWUP };
+  }
+
+  // ============================================================
+  // UI
+  // ============================================================
+  var MAX_LEN = 200;
+  var chatLog = document.getElementById('chat-log');
+  var freeInput = document.getElementById('free-input');
+  var charCount = document.getElementById('char-count');
+  var sendBtn = document.getElementById('send-btn');
+  var resetBtn = document.getElementById('reset-btn');
+  var sampleButtonsEl = document.getElementById('sample-buttons');
+
+  SAMPLE_QUESTIONS.forEach(function (q) {
+    var btn = document.createElement('button');
+    btn.className = 'sample-btn';
+    btn.textContent = q;
+    btn.addEventListener('click', function () {
+      submitQuestion(q);
+    });
+    sampleButtonsEl.appendChild(btn);
+  });
+
+  function clearEmptyState() {
+    var empty = chatLog.querySelector('.empty-log');
+    if (empty) {
+      chatLog.innerHTML = '';
+    }
+  }
+
+  function appendBubble(text, role, isFollowup) {
+    var bubble = document.createElement('div');
+    bubble.className = 'bubble ' + role + (isFollowup ? ' followup' : '');
+    bubble.textContent = text; // textContentで描画しHTMLインジェクションを防ぐ
+    chatLog.appendChild(bubble);
+    chatLog.scrollTop = chatLog.scrollHeight;
+  }
+
+  function submitQuestion(rawText) {
+    var text = (rawText || '').trim();
+    if (text.length === 0) {
+      return; // 空欄送信は無視
+    }
+    if (text.length > MAX_LEN) {
+      text = text.slice(0, MAX_LEN); // 文字数上限を超えた分は切り詰め
+    }
+
+    clearEmptyState();
+    appendBubble(text, 'user', false);
+
+    var result = buildAnswer(text);
+    appendBubble(result.answer, 'ai', result.status === STATUS_FOLLOWUP);
+
+    freeInput.value = '';
+    updateCharCount();
+  }
+
+  function updateCharCount() {
+    charCount.textContent = freeInput.value.length + ' / ' + MAX_LEN;
+  }
+
+  freeInput.addEventListener('input', updateCharCount);
+  freeInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      submitQuestion(freeInput.value);
+    }
+  });
+  sendBtn.addEventListener('click', function () {
+    submitQuestion(freeInput.value);
+  });
+
+  resetBtn.addEventListener('click', function () {
+    chatLog.innerHTML = '<p class="empty-log">サンプル質問を押すか、質問を入力して送信してください。</p>';
+    freeInput.value = '';
+    updateCharCount();
+  });
+})();
+</script>
+</body>
+</html>
