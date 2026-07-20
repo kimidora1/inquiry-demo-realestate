@@ -387,6 +387,8 @@
   // UI
   // ============================================================
   var MAX_LEN = 200;
+  var RESPONSE_DELAY_MS = 750;
+  var TYPING_DOT_INTERVAL_MS = 400;
   var chatLog = document.getElementById('chat-log');
   var freeInput = document.getElementById('free-input');
   var charCount = document.getElementById('char-count');
@@ -417,6 +419,17 @@
     bubble.textContent = text; // textContentで描画しHTMLインジェクションを防ぐ
     chatLog.appendChild(bubble);
     chatLog.scrollTop = chatLog.scrollHeight;
+    return bubble;
+  }
+
+  function showTypingBubble() {
+    var bubble = appendBubble('入力中.', 'ai', false);
+    var dotCount = 1;
+    var timer = setInterval(function () {
+      dotCount = (dotCount % 3) + 1;
+      bubble.textContent = '入力中' + '.'.repeat(dotCount);
+    }, TYPING_DOT_INTERVAL_MS);
+    return { bubble: bubble, timer: timer };
   }
 
   function submitQuestion(rawText) {
@@ -430,12 +443,17 @@
 
     clearEmptyState();
     appendBubble(text, 'user', false);
-
-    var result = buildAnswer(text);
-    appendBubble(result.answer, 'ai', result.status === STATUS_FOLLOWUP);
-
     freeInput.value = '';
     updateCharCount();
+
+    var result = buildAnswer(text);
+    var typing = showTypingBubble();
+
+    setTimeout(function () {
+      clearInterval(typing.timer);
+      typing.bubble.remove();
+      appendBubble(result.answer, 'ai', result.status === STATUS_FOLLOWUP);
+    }, RESPONSE_DELAY_MS); // 回答表示まで人間らしい間を作るための遅延
   }
 
   function updateCharCount() {
