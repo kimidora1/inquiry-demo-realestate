@@ -107,6 +107,13 @@
     margin: 0 0 10px;
     color: var(--sub);
   }
+  #demo-video {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+  }
   .sample-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -224,6 +231,14 @@
       <p>空室確認・工事進捗などの定型問い合わせはAIが即時回答。個別交渉などの非定型のみ担当者へ引き継ぐ。</p>
     </div>
   </div>
+
+  <section class="block">
+    <h2>動作イメージ動画</h2>
+    <video id="demo-video" controls preload="metadata" playsinline>
+      <source src="assets/videos/demo-flow-01.mp4" type="video/mp4">
+      お使いのブラウザは動画再生に対応していません。
+    </video>
+  </section>
 
   <section class="block">
     <h2>サンプル質問を試す</h2>
